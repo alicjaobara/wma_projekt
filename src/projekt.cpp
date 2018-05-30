@@ -2,6 +2,7 @@
 #include <fstream>
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include "opencv2/xfeatures2d.hpp"
 #include <dirent.h> //DIR
 
 using namespace std;
@@ -36,8 +37,18 @@ static string toLowerCase(const string& in) {
     return t;
 }
 
-static void calculateFeaturesFromInput(const string& imageFilename, vector<float>& featureVector, HOGDescriptor& hog) {
+static void calculateFeaturesFromInput(const string& imageFilename, vector<float>& featureVector, HOGDescriptor& hog, Mat& descriptors, Ptr<Feature2D>& f2d) {
     Mat imageData = imread(imageFilename, IMREAD_GRAYSCALE);
+
+    //-- Step 1: Detect the keypoints:
+    std::vector<KeyPoint> keypoints;
+    f2d->detect( imageData, keypoints );
+
+    //-- Step 2: Calculate descriptors (feature vectors)
+    f2d->compute( imageData, keypoints, descriptors);
+
+
+
     resize(imageData, imageData, Size(64, 128));
     if (imageData.empty()) {
         featureVector.clear();
@@ -84,7 +95,7 @@ static void getFilesInDirectory(const string& dirName, vector<string>& fileNames
 
 static void vectorF(vector<string> fileNames, vector<string>& newVector)
 {
-    int newSize=100;
+    int newSize=500;
     int licznik=1;
     for(int i=0;i<fileNames.size();++i)
     {
@@ -98,9 +109,10 @@ static void vectorF(vector<string> fileNames, vector<string>& newVector)
     return;
 }
 
-void toFile(string sign){
+int toFile(string sign){
     HOGDescriptor hog( Size(64,128), Size(16,16), Size(16,16), Size(16,16), 9);
-//    HOGDescriptor hog;
+    cv::Ptr<Feature2D> f2d = xfeatures2d::SIFT::create();
+    //    HOGDescriptor hog;
     static vector<string> TrainingImages0;
     static vector<string> TrainingImages;
     TrainingImages0.clear();
@@ -112,7 +124,6 @@ void toFile(string sign){
     vectorF(TrainingImages0,TrainingImages);
     cout<<"TrainingImages0 "<<TrainingImages0.size()<<" TrainingImages "<<TrainingImages.size()<<endl;
 
-
     unsigned long overallSamples = TrainingImages.size();
     if (overallSamples == 0) {
         printf("No training sample files found, nothing to do!\n");
@@ -121,12 +132,14 @@ void toFile(string sign){
     printf("Reading files, generating HOG features and save them to file '%s':\n", featuresFile.c_str());
     float percent;
     fstream File;
+    fstream FileSift;
     File.open(featuresFile.c_str(), ios::out|ios::app);
     if (File.good() && File.is_open()) {
         // Iterate over sample images
         for (unsigned long currentFile = 0; currentFile < overallSamples; ++currentFile) {
             storeCursor();
             vector<float> featureVector;
+            Mat descriptors;
             const string currentImageFile = TrainingImages.at(currentFile);
             // Output progress
             if ( (currentFile+1) % 10 == 0 || (currentFile+1) == overallSamples ) {
@@ -136,13 +149,13 @@ void toFile(string sign){
                 resetCursor();
             }
             // Calculate feature vector from current image file
-            calculateFeaturesFromInput(currentImageFile, featureVector, hog);
+            calculateFeaturesFromInput(currentImageFile, featureVector, hog, descriptors, f2d);
             if (!featureVector.empty()) {
                 // Save feature vector components
                 for (unsigned int feature = 0; feature < featureVector.size(); ++feature) {
                     if(feature == 0){
                         File << featureVector.at(feature);
-//                        cout<<featureVector.at(feature)<<endl;
+                        //                        cout<<featureVector.at(feature)<<endl;
                     }
                     else
                         File << "," << featureVector.at(feature);
@@ -156,15 +169,45 @@ void toFile(string sign){
                 else i=27;
                 File << ", " << i << endl;
             }
+            if (!descriptors.empty()) {
+                // Save feature vector components
+                for (unsigned int feature = 0; feature < descriptors.size(); ++feature) {
+                    if(feature == 0){
+                        FileSift << descriptors.at(feature);
+                        //                        cout<<featureVector.at(feature)<<endl;
+                    }
+                    else
+                        FileSift << "," << descriptors.at(feature);
+                }
+
+                char s = sign[0];
+                int isign = s;
+                int i=0;
+                if (isign>=65 && isign <= 90)
+                    i=isign-64;
+                else i=27;
+                FileSift << ", " << i << endl;
+            }
         }
         printf("\n");
         File.flush();
         File.close();
+        FileSift.flush();
+        FileSift.close();
     }
     else {
         printf("Error opening file '%s'!\n", featuresFile.c_str());
         return EXIT_FAILURE;
     }
+}
+
+int show(Mat img,string okno)
+{
+    imshow(okno, img);
+    waitKey(0);
+    cout<<"wielkość "<<okno<<" "<<img.size()<<endl;
+    destroyAllWindows();
+    return 0;
 }
 
 int main(int argc, char** argv)
@@ -181,17 +224,23 @@ int main(int argc, char** argv)
     string sign="A";
     char s = sign[0];
     int isign = s;
-    while (isign >= 65 && isign <= 90)
-    {
-        toFile(sign);
-        s = sign[0];
-        isign = s;
-        isign++;
-        s = isign;
-        sign[0] = s;
-    }
-//    toFile("B");
-//    toFile("C");
+    //    while (isign >= 65 && isign <= 90)
+    //    {
+    //        toFile(sign);
+    //        s = sign[0];
+    //        isign = s;
+    //        isign++;
+    //        s = isign;
+    //        sign[0] = s;
+    //    }
+    toFile("B");
+    //    toFile("C");
+
+
+
+
+
+
 
     return 0;
 }

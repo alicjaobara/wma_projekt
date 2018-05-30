@@ -2,7 +2,7 @@
 
 # Importing the libraries
 # math
-import numpy as np
+#import numpy as np
 # plot
 # import matplotlib.pyplot as plt
 # datasets managing
@@ -15,7 +15,7 @@ Y_hog = datasetHOG.iloc[:, 288].values
 
 # Splitting the dataset into the Training set and Test set
 from sklearn.cross_validation import train_test_split
-X_train, X_test, y_train, y_test = train_test_split(X_hog, Y_hog, test_size = 0.2)
+X_train, X_test, y_train, y_test = train_test_split(X_hog, Y_hog, test_size = 0.25)
 
 # Feature Scaling
 from sklearn.preprocessing import StandardScaler

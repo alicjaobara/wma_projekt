@@ -1,0 +1,26 @@
+strony:
+
+https://docs.opencv.org/trunk/d7/d9f/tutorial_linux_install.html
+https://github.com/NetEaseGame/ATX/wiki/Linux:-how-to-build-opencv-from-source
+https://github.com/opencv/opencv_contrib
+https://askubuntu.com/questions/374755/what-package-do-i-need-to-build-a-qt-5-cmake-application
+
+co chyba wpisałam:
+
+sudo apt-get install build-essential
+sudo apt-get install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev
+sudo apt-get install python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev
+
+(w tym ostatim jedno nie działało to usunęłam i jeszcze dałam jako drugie sudo apt-get install qtcreator cmake)
+
+git clone https://github.com/opencv/opencv.git
+git clone https://github.com/opencv/opencv_contrib.git
+
+cd opencv
+mkdir build
+cd build
+
+cmake -D WITH_QT=ON -D WITH_OPENGL=ON -D FORCE_VTK=ON -D WITH_TBB=ON -D WITH_GDAL=ON -D WITH_XINE=ON -D BUILD_EXAMPLES=ON -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local -D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modCDules ..
+
+make -j8
+sudo make install
