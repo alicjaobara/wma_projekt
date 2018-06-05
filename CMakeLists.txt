@@ -19,11 +19,21 @@ add_executable(projekt src/projekt.cpp)
 target_link_libraries(projekt ${OpenCV_LIBS})
 
 # Declare a cpp executable (projekt1)
-add_executable(projekt1 src/projekt1.cpp)
+#add_executable(projekt1 src/projekt1.cpp)
 # Specify libraries to link a library or executable target against (projekt1)
-target_link_libraries(projekt1 ${OpenCV_LIBS})
+#target_link_libraries(projekt1 ${OpenCV_LIBS})
 
 # Declare a cpp executable (main)
 #add_executable(main src/main.cpp)
 # Specify libraries to link a library or executable target against (main)
 #target_link_libraries(main ${OpenCV_LIBS})
+
+# Declare a cpp executable (random)
+#add_executable(random src/random.cpp)
+# Specify libraries to link a library or executable target against (random)
+#target_link_libraries(random ${OpenCV_LIBS})
+
+# Declare a cpp executable (siftkmeans)
+#add_executable(siftkmeans src/siftkmeans.cpp)
+# Specify libraries to link a library or executable target against (siftkmeans)
+#target_link_libraries(siftkmeans ${OpenCV_LIBS})
